@@ -26,6 +26,13 @@ class TaskContainer {
 	protected $tasks = [];
 
 	/**
+	 * All of the "error" callbacks.
+	 *
+	 * @var array
+	 */
+	protected $error = [];
+
+	/**
 	 * All of the "after" callbacks.
 	 *
 	 * @var array
@@ -149,7 +156,7 @@ class TaskContainer {
 	}
 
 	/**
-	 * Deteremine if the container only has one registered server.
+	 * Determine if the container only has one registered server.
 	 *
 	 * @return bool
 	 */
@@ -169,7 +176,7 @@ class TaskContainer {
 	}
 
 	/**
-	 * Get the givne macro from the container.
+	 * Get the given macro from the container.
 	 *
 	 * @param  string  $macro
 	 * @return array|null
@@ -295,6 +302,27 @@ class TaskContainer {
 	public function getAfterCallbacks()
 	{
 		return $this->after;
+	}
+
+	/**
+	 * Register an error-task callback.
+	 *
+	 * @param  \Closure  $callback
+	 * @return void
+	 */
+	public function error(Closure $callback)
+	{
+		$this->error[] = $callback;
+	}
+
+	/**
+	 * Get all of the error-task callbacks.
+	 *
+	 * @return array
+	 */
+	public function getErrorCallbacks()
+	{
+		return $this->error;
 	}
 
 	/**

@@ -6,6 +6,7 @@ use Laravel\Envoy\Compiler;
 use Laravel\Envoy\ParallelSSH;
 use Laravel\Envoy\TaskContainer;
 use Symfony\Component\Process\Process;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -25,7 +26,8 @@ class RunCommand extends \Symfony\Component\Console\Command\Command {
 
 		$this->setName('run')
 				->setDescription('Run an Envoy task.')
-				->addArgument('task', InputArgument::REQUIRED);
+				->addArgument('task', InputArgument::REQUIRED)
+				->addOption('pretend', null, InputOption::VALUE_NONE, 'Dump Bash script for inspection.');
 	}
 
 	/**
@@ -47,7 +49,7 @@ class RunCommand extends \Symfony\Component\Console\Command\Command {
 	 * Get the tasks from the container based on user input.
 	 *
 	 * @param  \Laravel\Envoy\TaskContainer  $container
-	 * @reutrn void
+	 * @return void
 	 */
 	protected function getTasks($container)
 	{
@@ -72,6 +74,11 @@ class RunCommand extends \Symfony\Component\Console\Command\Command {
 	{
 		if ($this->runTaskOverSSH($container->getTask($task)) > 0)
 		{
+			foreach ($container->getErrorCallbacks() as $callback)
+			{
+				call_user_func($callback, $task);
+			}
+
 			return;
 		}
 
@@ -88,6 +95,29 @@ class RunCommand extends \Symfony\Component\Console\Command\Command {
 	 * @return int
 	 */
 	protected function runTaskOverSSH(Task $task)
+	{
+		// If the pretending option has been set, we'll simply dump the script out to the command
+		// line so the developer can inspect it which is useful for just inspecting the script
+		// before it is actually run against these servers. Allows checking for errors, etc.
+		if ($this->pretending())
+		{
+			echo $task->script.PHP_EOL;
+
+			return 1;
+		}
+		else
+		{
+			return $this->passToRemoteProcessor($task);
+		}
+	}
+
+	/**
+	 * Run the given task and return the exit code.
+	 *
+	 * @param  \Laravel\Envoy\Task  $task
+	 * @return int
+	 */
+	protected function passToRemoteProcessor(Task $task)
 	{
 		return $this->getRemoteProcessor($task)->run($task, function($type, $host, $line)
 		{
@@ -125,8 +155,15 @@ class RunCommand extends \Symfony\Component\Console\Command\Command {
 	 */
 	protected function loadTaskContainer()
 	{
+		if ( ! file_exists($envoyFile = getcwd().'/Envoy.blade.php'))
+		{
+			echo "Envoy.blade.php not found.\n";
+
+			exit(1);
+		}
+
 		with($container = new TaskContainer)->load(
-			getcwd().'/Envoy.blade.php', new Compiler, $this->getOptions()
+			$envoyFile, new Compiler, $this->getOptions()
 		);
 
 		return $container;
@@ -143,7 +180,7 @@ class RunCommand extends \Symfony\Component\Console\Command\Command {
 
 		// Here we will gather all of the command line options that have been specified with
 		// the double hyphens in front of their name. We will make these available to the
-		// Blade task file so they can be used in echo statemnets and other structures.
+		// Blade task file so they can be used in echo statements and other structures.
 		foreach ($_SERVER['argv'] as $argument)
 		{
 			preg_match('/^\-\-(.*?)=(.*)$/', $argument, $match);
@@ -152,6 +189,16 @@ class RunCommand extends \Symfony\Component\Console\Command\Command {
 		}
 
 		return $options;
+	}
+
+	/**
+	 * Deteremine if the SSH command should be dumped.
+	 *
+	 * @return bool
+	 */
+	protected function pretending()
+	{
+		return $this->input->getOption('pretend');
 	}
 
 	/**

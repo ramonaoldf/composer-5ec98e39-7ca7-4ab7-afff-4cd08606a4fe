@@ -9,13 +9,34 @@ Elegant SSH tasks for PHP.
 - [Multiple Servers](#multiple-servers)
 - [Parallel Execution](#parallel-execution)
 - [HipChat Notifications](#hipchat-notifications)
+- [Slack Notifications](#slack-notifications)
+
+<a name="what-is-it"></a>
+## What Is It?
+
+Envoy is a simple SSH task runner for PHP 5.4 or greater. It is loosely inspired by Python Fabric. It supports:
+
+- Clean, minimal syntax for defining tasks.
+- Utilizes ~/.ssh/config settings.
+- Parallel execution across multiple servers.
+- Stops execution if any command fails.
+- Macros quickly group tasks into a single command.
+- HipChat notifications.
+
+Envoy is perfect for automating common tasks you perform on your remote servers such as deployment, restarting queues, etc.
 
 <a name="installation"></a>
 ## Installation
 
-Envoy is a simple SSH task runner for PHP 5.4 or greater. To compile the `envoy.phar` file yourself, clone this repository and run the `box build` command. To run `box` commands, you must install [kherge/Box](https://github.com/kherge/Box).
+The simplest method of installation is to simply [download the envoy.phar file](https://github.com/laravel/envoy/raw/master/envoy.phar) from this repository.
 
-Once the Phar has been compiled, move it to `/usr/local/bin` as `envoy` for easy access.
+To compile the `envoy.phar` file yourself, clone this repository and run the `box build` command. To run `box` commands, you must install [kherge/Box](https://github.com/kherge/Box).
+
+Once the Phar has been compiled, move it to `/usr/local/bin` as `envoy` for easy access. You may need to grant the file execution privileges (`chmod +x`) before running tasks.
+
+### Updating Envoy
+
+To update Envoy, you may use the `envoy self-update` command.
 
 <a name="running-tasks"></a>
 ## Running Tasks
@@ -117,3 +138,31 @@ To run a task across multiple servers in parallel, use the `parallel` option on 
 ```
 
 > **Note:** HipChat notifications will only be sent if all tasks complete successfully.
+
+<a name="slack-notifications"></a>
+## Slack Notifications
+
+```
+@servers(['web' => '192.168.1.1'])
+
+@task('foo', ['on' => 'web'])
+	ls -la
+@endtask
+
+@after
+	@slack('team', 'token', 'channel')
+@endafter
+```
+
+You may retrieve your token by creating an **Incoming WebHooks** integration on Slack's website.
+
+The team argument is your Slack subdomain (fooapp.slack.com = `fooapp`).
+
+You may provide one of the following for the channel argument:
+
+- For a regular channel: `#channel`
+- For a specific user: `@user`
+- For a private group: `group`
+- If no argument is provided Envoy will use the default channel configured on the Slack website.
+
+> **Note:** Slack notifications will only be sent if all tasks complete successfully.
