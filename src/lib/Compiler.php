@@ -17,6 +17,7 @@ class Compiler {
 	 * @var array
 	 */
 	protected $compilers = array(
+		'Comments',
 		'Echos',
 		'Openings',
 		'Closings',
@@ -33,7 +34,10 @@ class Compiler {
 		'TaskStop',
 		'After',
 		'AfterStop',
+		'Error',
+		'ErrorStop',
 		'Hipchat',
+		'Slack',
 	);
 
 	/**
@@ -323,6 +327,30 @@ class Compiler {
 	}
 
 	/**
+	 * Compile Envoy error statements into valid PHP.
+	 *
+	 * @param  string  $value
+	 * @return string
+	 */
+	protected function compileError($value)
+	{
+		$pattern = $this->createPlainMatcher('error');
+
+		return preg_replace($pattern, '$1<?php $__container->error(function($task) {$2', $value);
+	}
+
+	/**
+	 * Compile Envoy error stop statements into valid PHP.
+	 *
+	 * @param  string  $value
+	 * @return string
+	 */
+	protected function compileErrorStop($value)
+	{
+		return preg_replace($this->createPlainMatcher('enderror'), '$1}); ?>$2', $value);
+	}
+
+	/**
 	 * Compile Envoy HipChat statements into valid PHP.
 	 *
 	 * @param  string  $value
@@ -333,6 +361,19 @@ class Compiler {
 		$pattern = $this->createMatcher('hipchat');
 
 		return preg_replace($pattern, '$1 Laravel\Envoy\Hipchat::make$2->task($task)->send();', $value);
+	}
+
+	/**
+	 * Compile Envoy Slack statements into valid PHP.
+	 *
+	 * @param  string  $value
+	 * @return string
+	 */
+	protected function compileSlack($value)
+	{
+		$pattern = $this->createMatcher('slack');
+
+		return preg_replace($pattern, '$1 Laravel\Envoy\Slack::make$2->task($task)->send();', $value);
 	}
 
 	/**
