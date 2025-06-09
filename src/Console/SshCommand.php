@@ -3,10 +3,10 @@
 namespace Laravel\Envoy\Console;
 
 use Laravel\Envoy\Compiler;
-use Laravel\Envoy\TaskContainer;
 use Laravel\Envoy\ConfigurationParser;
-use Symfony\Component\Console\Input\InputOption;
+use Laravel\Envoy\TaskContainer;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
 class SshCommand extends \Symfony\Component\Console\Command\Command
 {
@@ -29,13 +29,15 @@ class SshCommand extends \Symfony\Component\Console\Command\Command
     /**
      * Execute the command.
      *
-     * @return void
+     * @return int
      */
     protected function fire()
     {
         $host = $this->getServer($container = $this->loadTaskContainer());
 
         passthru('ssh '.($this->getConfiguredServer($host) ?: $host));
+
+        return 0;
     }
 
     /**
