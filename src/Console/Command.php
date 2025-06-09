@@ -1,12 +1,10 @@
 <?php namespace Laravel\Envoy\Console;
 
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 trait Command
 {
-
     /**
      * Execute the command.
      *
@@ -18,6 +16,7 @@ trait Command
     {
         $this->input = $input;
         $this->output = $output;
+
         return (int) $this->fire();
     }
 
@@ -54,6 +53,22 @@ trait Command
         $question = '<comment>'.$question.'</comment> ';
 
         return $this->getHelperSet()->get('dialog')->ask($this->output, $question);
+    }
+
+    /**
+    * Confirm the operation with the user.
+    *
+    * @param  string  $task
+    * @param string $question
+    * @return bool
+    */
+    public function confirmTaskWithUser($task, $question)
+    {
+        $question = $question === true ? 'Are you sure you want to run the ['.$task.'] task?' : (string) $question;
+
+        $question = '<comment>'.$question.' [y/N]:</comment> ';
+
+        return  $this->getHelperSet()->get('dialog')->askConfirmation($this->output, $question, false);
     }
 
     /**
