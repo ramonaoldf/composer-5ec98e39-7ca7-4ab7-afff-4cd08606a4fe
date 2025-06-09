@@ -51,6 +51,13 @@ class TaskContainer
     protected $after = [];
 
     /**
+     * All of the "finished" callbacks.
+     *
+     * @var array
+     */
+    protected $finished = [];
+
+    /**
      * All of the options for each task.
      *
      * @var array
@@ -446,6 +453,27 @@ class TaskContainer
     public function getAfterCallbacks()
     {
         return $this->after;
+    }
+
+    /**
+     * Register an finished-task callback.
+     *
+     * @param  \Closure  $callback
+     * @return void
+     */
+    public function finished(Closure $callback)
+    {
+        $this->finished[] = $callback;
+    }
+
+    /**
+     * Get all of the finished-task callbacks.
+     *
+     * @return array
+     */
+    public function getFinishedCallbacks()
+    {
+        return $this->finished;
     }
 
     /**

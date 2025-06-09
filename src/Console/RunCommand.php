@@ -73,6 +73,10 @@ class RunCommand extends \Symfony\Component\Console\Command\Command
             }
         }
 
+        foreach ($container->getFinishedCallbacks() as $callback) {
+            call_user_func($callback);
+        }
+
         return $exitCode;
     }
 
@@ -174,7 +178,7 @@ class RunCommand extends \Symfony\Component\Console\Command\Command
 
         foreach ($lines as $line) {
             if (strlen(trim($line)) === 0) {
-                return;
+                continue;
             }
 
             if ($type == Process::OUT) {
