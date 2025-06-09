@@ -235,7 +235,9 @@ class TaskContainer
             $options['on'] = [];
         }
 
-        return array_map(function ($name) { return $this->getServer($name); }, (array) $options['on']);
+        return array_flatten(array_map(function ($name) {
+            return $this->getServer($name);
+        }, (array) $options['on']));
     }
 
     /**
