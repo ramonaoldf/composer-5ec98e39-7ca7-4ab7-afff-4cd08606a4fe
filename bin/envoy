@@ -2,13 +2,9 @@
 <?php
 
 require __DIR__.'/../src/vendor/autoload.php';
-$app = new Symfony\Component\Console\Application('Laravel Envoy', '1.0.11');
+$app = new Symfony\Component\Console\Application('Laravel Envoy', '1.0.13');
 $app->add(new Laravel\Envoy\Console\RunCommand);
 $app->add(new Laravel\Envoy\Console\SshCommand);
-
-$updateCommand = new KevinGH\Amend\Command('self-update');
-$updateCommand->setManifestUri('https://github.com/laravel/envoy/raw/master/envoy-manifest.json');
-$app->getHelperSet()->set(new KevinGH\Amend\Helper);
-$app->add($updateCommand);
+$app->add(new Laravel\Envoy\Console\InitCommand);
 
 $app->run();
