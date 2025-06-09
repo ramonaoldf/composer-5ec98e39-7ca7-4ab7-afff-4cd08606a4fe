@@ -38,6 +38,8 @@ class Compiler
         'TaskStop',
         'After',
         'AfterStop',
+        'Finished',
+        'FinishedStop',
         'Error',
         'ErrorStop',
         'Hipchat',
@@ -350,6 +352,30 @@ class Compiler
     protected function compileAfterStop($value)
     {
         return preg_replace($this->createPlainMatcher('endafter'), '$1}); ?>$2', $value);
+    }
+
+    /**
+     * Compile Envoy finished statements into valid PHP.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    protected function compileFinished($value)
+    {
+        $pattern = $this->createPlainMatcher('finished');
+
+        return preg_replace($pattern, '$1<?php $_vars = get_defined_vars(); $__container->finished(function() use ($_vars) { extract($_vars); $2', $value);
+    }
+
+    /**
+     * Compile Envoy finished stop statements into valid PHP.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    protected function compileFinishedStop($value)
+    {
+        return preg_replace($this->createPlainMatcher('endfinished'), '$1}); ?>$2', $value);
     }
 
     /**
