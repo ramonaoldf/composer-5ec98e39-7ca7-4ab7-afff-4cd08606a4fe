@@ -8,12 +8,9 @@ use Laravel\Envoy\TaskContainer;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 class RunCommand extends \Symfony\Component\Console\Command\Command
 {
-
     use Command;
 
     /**
@@ -79,6 +76,12 @@ class RunCommand extends \Symfony\Component\Console\Command\Command
      */
     protected function runTask($container, $task)
     {
+        $confirm = $container->getTask($task)->confirm;
+
+        if ($confirm && ! $this->confirmTaskWithUser($task, $confirm)) {
+            return;
+        }
+
         if (($exitCode = $this->runTaskOverSSH($container->getTask($task))) > 0) {
             foreach ($container->getErrorCallbacks() as $callback) {
                 call_user_func($callback, $task);
