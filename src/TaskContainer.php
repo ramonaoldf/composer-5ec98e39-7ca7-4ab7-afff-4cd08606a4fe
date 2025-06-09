@@ -161,7 +161,9 @@ class TaskContainer
     protected function replaceSubTasks()
     {
         foreach ($this->tasks as $name => &$script) {
-            $callback = function ($m) { return $m[1].$this->tasks[$m[2]]; };
+            $callback = function ($m) {
+                return $m[1].$this->tasks[$m[2]];
+            };
 
             $script = $this->trimSpaces(
                 preg_replace_callback("/(\s*)@run\('(.*)'\)/", $callback, $script)
@@ -193,7 +195,7 @@ class TaskContainer
             throw new \Exception('Server ['.$server.'] is not defined.');
         }
 
-        return array_get($this->servers, $server);
+        return Arr::get($this->servers, $server);
     }
 
     /**
@@ -288,7 +290,7 @@ class TaskContainer
      */
     public function getMacro($macro)
     {
-        return array_get($this->macros, $macro);
+        return Arr::get($this->macros, $macro);
     }
 
     /**
@@ -299,7 +301,7 @@ class TaskContainer
      */
     public function getMacroOptions($macro)
     {
-        return array_get($this->macroOptions, $macro, []);
+        return Arr::get($this->macroOptions, $macro, []);
     }
 
     /**
@@ -322,7 +324,7 @@ class TaskContainer
      */
     public function getTask($task, array $macroOptions = [])
     {
-        $script = array_get($this->tasks, $task, '');
+        $script = Arr::get($this->tasks, $task, '');
 
         if ($script == '') {
             throw new \Exception(sprintf('Task "%s" is not defined.', $task));
@@ -330,9 +332,9 @@ class TaskContainer
 
         $options = array_merge($this->getTaskOptions($task), $macroOptions);
 
-        $parallel = array_get($options, 'parallel', false);
+        $parallel = Arr::get($options, 'parallel', false);
 
-        $confirm = array_get($options, 'confirm', null);
+        $confirm = Arr::get($options, 'confirm', null);
 
         return new Task($this->getServers($options), $options['as'], $script, $parallel, $confirm);
     }
@@ -345,7 +347,7 @@ class TaskContainer
      */
     public function getTaskOptions($task)
     {
-        return array_get($this->taskOptions, $task, []);
+        return Arr::get($this->taskOptions, $task, []);
     }
 
     /**
@@ -360,7 +362,7 @@ class TaskContainer
             $options['on'] = [];
         }
 
-        return array_flatten(array_map(function ($name) {
+        return Arr::flatten(array_map(function ($name) {
             return $this->getServer($name);
         }, (array) $options['on']));
     }
