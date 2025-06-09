@@ -1,6 +1,18 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/envoy/compare/v2.0.0...2.x)
+## [Unreleased](https://github.com/laravel/envoy/compare/v2.1.0...2.x)
+
+
+## [v2.1.0 (2020-05-26)](https://github.com/laravel/envoy/compare/v2.0.1...v2.1.0)
+
+### Added
+- Add Telegram notifications support ([#192](https://github.com/laravel/envoy/pull/192))
+
+
+## [v2.0.1 (2020-03-03)](https://github.com/laravel/envoy/compare/v2.0.0...v2.0.1)
+
+### Fixed
+- Fix a bug with story overriding arguments ([65d779c](https://github.com/laravel/envoy/commit/65d779cc1742082fecca5a1c51627f61022c3547))
 
 
 ## [v2.0.0 (2020-03-03)](https://github.com/laravel/envoy/compare/v1.6.5...v2.0.0)
