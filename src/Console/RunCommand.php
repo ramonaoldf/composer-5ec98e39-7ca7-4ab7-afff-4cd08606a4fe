@@ -8,11 +8,12 @@ use Laravel\Envoy\ParallelSSH;
 use Laravel\Envoy\SSH;
 use Laravel\Envoy\Task;
 use Laravel\Envoy\TaskContainer;
+use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Process\Process;
 
-class RunCommand extends \Symfony\Component\Console\Command\Command
+class RunCommand extends SymfonyCommand
 {
     use Command;
 
@@ -32,6 +33,13 @@ class RunCommand extends \Symfony\Component\Console\Command\Command
         '--no-interactions',
         '--verbose',
     ];
+
+    /**
+     * The hosts that have already been assigned a color for output.
+     *
+     * @var array
+     */
+    protected $hostsWithColor = [];
 
     /**
      * Configure the command options.
@@ -179,15 +187,17 @@ class RunCommand extends \Symfony\Component\Console\Command\Command
     {
         $lines = explode("\n", $line);
 
+        $hostColor = $this->getHostColor($host);
+
         foreach ($lines as $line) {
             if (strlen(trim($line)) === 0) {
                 continue;
             }
 
             if ($type == Process::OUT) {
-                $this->output->write('<comment>['.$host.']</comment>: '.trim($line).PHP_EOL);
+                $this->output->write($hostColor.': '.trim($line).PHP_EOL);
             } else {
-                $this->output->write('<comment>['.$host.']</comment>: <fg=red>'.trim($line).'</>'.PHP_EOL);
+                $this->output->write($hostColor.':  '.'<fg=red>'.trim($line).'</>'.PHP_EOL);
             }
         }
     }
@@ -217,6 +227,25 @@ class RunCommand extends \Symfony\Component\Console\Command\Command
         );
 
         return $container;
+    }
+
+    /**
+     * Return the hostname wrapped in a color tag.
+     *
+     * @param  string  $host
+     * @return string
+     */
+    protected function getHostColor($host)
+    {
+        $colors = ['yellow', 'cyan', 'magenta', 'blue'];
+
+        if (! in_array($host, $this->hostsWithColor)) {
+            $this->hostsWithColor[] = $host;
+        }
+
+        $color = $colors[array_search($host, $this->hostsWithColor) % count($colors)];
+
+        return "<fg={$color}>[{$host}]</>";
     }
 
     /**
